@@ -1,5 +1,5 @@
 import mysql.connector
-from config import config
+from config.config import Config
 
 movies_by_country_query = ("SELECT country.country_id,"
                            "movie.movie_id,"
@@ -27,7 +27,7 @@ movie_cast_and_crew_query = ("SELECT m.movie_id, "
                              "p.person_id, "
                              "p.person_name, "
                              "mc.character_name, "
-                             "m.title AS movie_title, "
+                             "m.title, "
                              "mc.cast_order, "
                              "g.gender, "
                              "NULL AS department_id, "
@@ -38,12 +38,13 @@ movie_cast_and_crew_query = ("SELECT m.movie_id, "
                              "LEFT JOIN movie_cast mc ON m.movie_id = mc.movie_id "
                              "LEFT JOIN person p ON mc.person_id = p.person_id "
                              "LEFT JOIN gender g ON mc.gender_id = g.gender_id "
+                             "WHERE p.person_id IS NOT NULL "
                              "UNION "
                              "SELECT m.movie_id,"
                              "p.person_id, "
                              "p.person_name, "
                              "NULL AS character_name, "
-                             "m.title AS movie_title, "
+                             "m.title, "
                              "NULL AS cast_order, "
                              "NULL AS gender, "
                              "d.department_id, "
@@ -53,45 +54,47 @@ movie_cast_and_crew_query = ("SELECT m.movie_id, "
                              "FROM movie m "
                              "LEFT JOIN movie_crew mcr ON m.movie_id = mcr.movie_id "
                              "LEFT JOIN person p ON mcr.person_id = p.person_id "
-                             "LEFT JOIN department d ON mcr.department_id = d.department_id;")
+                             "LEFT JOIN department d ON mcr.department_id = d.department_id "
+                             "WHERE p.person_id IS NOT NULL;")
 
-production_company_movies_count_query = ("SELECT pc.company_name, "
+production_company_movies_count_query = ("SELECT pc.company_id, "
+                                         "pc.company_name, "
                                          "COUNT(DISTINCT mc.movie_id) AS movie_count "
                                          "FROM production_company pc "
                                          "JOIN movie_company mc ON pc.company_id = mc.company_id "
-                                         "GROUP BY pc.company_name "
+                                         "GROUP BY pc.company_id "
                                          "ORDER BY movie_count DESC;")
 
-most_popular_genre_by_language_query = ("SELECT l.language_id, "
-                                        "g.genre_id, "
-                                        "l.language_code, "
-                                        "l.language_name, "
-                                        "g.genre_name, "
-                                        "AVG(m.popularity) AS average_popularity "
-                                        "FROM language l "
-                                        "JOIN movie_languages ml ON l.language_id = ml.language_id "
-                                        "JOIN language_role lr ON ml.language_role_id = lr.role_id "
-                                        "JOIN movie m ON ml.movie_id = m.movie_id "
-                                        "JOIN movie_genres mg ON m.movie_id = mg.movie_id "
-                                        "JOIN genre g ON mg.genre_id = g.genre_id "
-                                        "WHERE lr.language_role = 'Original' "
-                                        "GROUP BY l.language_id, "
-                                        "g.genre_id, "
-                                        "l.language_code, "
-                                        "l.language_name, "
-                                        "g.genre_name "
-                                        "ORDER BY l.language_name, average_popularity DESC;")
+most_popular_genres_by_language_query = ("SELECT l.language_id, "
+                                         "g.genre_id, "
+                                         "l.language_code, "
+                                         "l.language_name, "
+                                         "g.genre_name, "
+                                         "AVG(m.popularity) AS average_popularity "
+                                         "FROM language l "
+                                         "JOIN movie_languages ml ON l.language_id = ml.language_id "
+                                         "JOIN language_role lr ON ml.language_role_id = lr.role_id "
+                                         "JOIN movie m ON ml.movie_id = m.movie_id "
+                                         "JOIN movie_genres mg ON m.movie_id = mg.movie_id "
+                                         "JOIN genre g ON mg.genre_id = g.genre_id "
+                                         "WHERE lr.language_role = 'Original' "
+                                         "GROUP BY l.language_id, "
+                                         "g.genre_id, "
+                                         "l.language_code, "
+                                         "l.language_name, "
+                                         "g.genre_name "
+                                         "ORDER BY l.language_name, average_popularity DESC;")
 
 TABLE_QUERIES = {
     "movies_by_country": movies_by_country_query,
     "movie_cast_and_crew": movie_cast_and_crew_query,
     "production_company_movies_count": production_company_movies_count_query,
-    "most_popular_genre_by_language": most_popular_genre_by_language_query
+    "most_popular_genres_by_language": most_popular_genres_by_language_query
 }
 
 
 def connect_to_mysql():
-    # Create and return a MySQL connection
+    config = Config()
     return mysql.connector.connect(
         host=config.MYSQL_HOST,
         user=config.MYSQL_USER,
