@@ -1,5 +1,6 @@
 from data_extraction.mysql_extractor import MySQLExtractor
 from data_fetching.cassandra_data_fetcher import CassandraDataProvider
+from data_indexing.elasticsearch_indexer import ElasticsearchIndexer
 from data_loading.cassandra_loader import CassandraLoader
 from data_transformation.transformer import DataTransformer
 
@@ -21,7 +22,7 @@ class DataProcessor:
         cassandra_data = self.cassandra_provider.fetch_all_data()
 
         transformed_data = DataTransformer.transform_for_elasticsearch(cassandra_data)
-
+        print("End of data formatting")
         return transformed_data
 
 
@@ -30,6 +31,10 @@ def main():
         data_processor = DataProcessor()
         data_processor.extract_transform_load_from_mysql_to_cassandra()
         transformed_data_for_elasticsearch = data_processor.fetch_transform_from_cassandra()
+
+        indexer = ElasticsearchIndexer()
+        indexer.index_data_into_elasticsearch(transformed_data_for_elasticsearch)
+        print("Data indexed")
 
     except Exception as e:
         print("An error occurred:", e)

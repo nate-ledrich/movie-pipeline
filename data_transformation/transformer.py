@@ -1,4 +1,7 @@
+import datetime
 import uuid
+
+from cassandra.util import Date
 
 
 class DataTransformer:
@@ -81,6 +84,26 @@ class DataTransformer:
         return transformed_data
 
     @staticmethod
+    def format_date_for_elasticsearch(date_obj):
+        if isinstance(date_obj, Date):
+            formatted_date = DataTransformer.convert_cassandra_date(date_obj)
+            return formatted_date
+        else:
+            raise ValueError("Invalid date object provided")
+
+    @staticmethod
+    def convert_cassandra_date(cassandra_date):
+        if cassandra_date is None:
+            return None
+
+        year = cassandra_date.date().year
+        month = cassandra_date.date().month
+        day = cassandra_date.date().day
+
+        python_date = datetime.date(year, month, day)
+        return python_date.isoformat()
+
+    @staticmethod
     def transform_for_elasticsearch(data):
         transformed_data = {}
 
@@ -93,21 +116,21 @@ class DataTransformer:
             if table_name == "movies_by_country":
                 for row in table_data:
                     print(row)
-                    transformed_row = {"country_id": row[0],
-                                       "movie_id": row[1],
-                                       "budget": row[2],
-                                       "title": row[3],
-                                       "country_iso_code": row[4],
-                                       "country_name": row[5],
-                                       "homepage": row[6],
-                                       "movie_status": row[7],
-                                       "overview": row[8],
-                                       "popularity": row[9],
-                                       "release_date": row[10],
-                                       "revenue": row[11],
-                                       "runtime": row[12],
-                                       "tagline": row[13],
-                                       "vote_average": row[14],
+                    transformed_row = {"country_id": str(row[0]),
+                                       "movie_id": str(row[1]),
+                                       "budget": float(row[2]),
+                                       "country_iso_code": row[3],
+                                       "country_name": row[4],
+                                       "homepage": row[5],
+                                       "movie_status": row[6],
+                                       "overview": row[7],
+                                       "popularity": float(row[8]),
+                                       "release_date": DataTransformer.format_date_for_elasticsearch(row[9]),
+                                       "revenue": float(row[10]),
+                                       "runtime": row[11],
+                                       "tagline": row[12],
+                                       "title": row[13],
+                                       "vote_average": float(row[14]),
                                        "vote_count": row[15]}
 
                     table_transformed_data.append(transformed_row)
@@ -119,11 +142,11 @@ class DataTransformer:
             elif table_name == "movie_cast_and_crew":
                 for row in table_data:
                     print(row)
-                    transformed_row = {"movie_id": row[0],
-                                       "person_id": row[1],
+                    transformed_row = {"movie_id": str(row[0]),
+                                       "person_id": str(row[1]),
                                        "cast_order": row[2],
                                        "character_name": row[3],
-                                       "department_id": row[4],
+                                       "department_id": str(row[4]),
                                        "department_name": row[5],
                                        "gender": row[6],
                                        "job": row[7],
@@ -140,7 +163,7 @@ class DataTransformer:
             elif table_name == "production_company_movies_count":
                 for row in table_data:
                     print(row)
-                    transformed_row = {"company_id": row[0],
+                    transformed_row = {"company_id": str(row[0]),
                                        "company_name": row[1],
                                        "movie_count": row[2]}
 
@@ -153,9 +176,9 @@ class DataTransformer:
             elif table_name == "most_popular_genres_by_language":
                 for row in table_data:
                     print(row)
-                    transformed_row = {"language_id": row[0],
-                                       "popularity": row[1],
-                                       "genre_id": row[2],
+                    transformed_row = {"language_id": str(row[0]),
+                                       "popularity": float(row[1]),
+                                       "genre_id": str(row[2]),
                                        "genre_name": row[3],
                                        "language_code": row[4],
                                        "language_name": row[5]}
