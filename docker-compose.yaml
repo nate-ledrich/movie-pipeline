@@ -1,0 +1,62 @@
+version: '3'
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ./mysql-init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - movie-data-pipeline-network
+
+  cassandra:
+    container_name: cassandra
+    image: cassandra:latest
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_HOST=${CASSANDRA_HOST}
+      - CASSANDRA_PORT=${CASSANDRA_PORT}
+      - CASSANDRA_KEYSPACE=${CASSANDRA_KEYSPACE}
+    volumes:
+      - cassandra-data:/var/lib/cassandra/data
+    networks:
+      - movie-data-pipeline-network
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST}
+      - ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT}
+    networks:
+      - movie-data-pipeline-network
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:8.9.1
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - movie-data-pipeline-network
+
+networks:
+  movie-data-pipeline-network:
+    driver: bridge
+
+volumes:
+  cassandra-data:

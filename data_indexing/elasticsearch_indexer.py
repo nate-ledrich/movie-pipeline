@@ -1,5 +1,4 @@
 from elasticsearch import Elasticsearch
-
 from config.config import Config
 
 
