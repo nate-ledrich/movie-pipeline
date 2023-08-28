@@ -96,6 +96,8 @@ class MySQLExtractor:
 
     def __init__(self):
         self.config = Config()
+        self.connection = self.connect_to_mysql()
+        self.cursor = self.connection.cursor()
 
     def connect_to_mysql(self):
         return mysql.connector.connect(
@@ -107,25 +109,23 @@ class MySQLExtractor:
 
     def extract_data_from_one_table(self, query):
         try:
-            connection = self.connect_to_mysql()
-            cursor = connection.cursor()
-
-            cursor.execute(query)
-
-            data = cursor.fetchall()
-
-            cursor.close()
-            connection.close()
-
+            self.cursor.execute(query)
+            data = self.cursor.fetchall()
             return data
-
         except mysql.connector.Error as err:
             print("Error:", err)
             return []
 
     def extract_all_data(self):
-        data_by_table = {}
-        for table_name, query in self.TABLE_QUERIES.items():
-            data = self.extract_data_from_one_table(query)
-            data_by_table[table_name] = data
-        return data_by_table
+        try:
+            data_by_table = {}
+            for table_name, query in self.TABLE_QUERIES.items():
+                data = self.extract_data_from_one_table(query)
+                data_by_table[table_name] = data
+            return data_by_table
+        finally:
+            self.close_connection()
+
+    def close_connection(self):
+        self.cursor.close()
+        self.connection.close()

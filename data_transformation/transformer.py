@@ -79,3 +79,93 @@ class DataTransformer:
         for table_name, data in data_by_table.items():
             transformed_data[table_name] = DataTransformer.transform_data(data, table_name)
         return transformed_data
+
+    @staticmethod
+    def transform_for_elasticsearch(data):
+        transformed_data = {}
+
+        for table_name, table_data in data.items():
+            table_transformed_data = []
+
+            print(f"Table: {table_name}")
+            print("Original Data:")
+
+            if table_name == "movies_by_country":
+                for row in table_data:
+                    print(row)
+                    transformed_row = {"country_id": row[0],
+                                       "movie_id": row[1],
+                                       "budget": row[2],
+                                       "title": row[3],
+                                       "country_iso_code": row[4],
+                                       "country_name": row[5],
+                                       "homepage": row[6],
+                                       "movie_status": row[7],
+                                       "overview": row[8],
+                                       "popularity": row[9],
+                                       "release_date": row[10],
+                                       "revenue": row[11],
+                                       "runtime": row[12],
+                                       "tagline": row[13],
+                                       "vote_average": row[14],
+                                       "vote_count": row[15]}
+
+                    table_transformed_data.append(transformed_row)
+
+                print("Transformed Data:")
+                for transformed_row in table_transformed_data:
+                    print(transformed_row)
+
+            elif table_name == "movie_cast_and_crew":
+                for row in table_data:
+                    print(row)
+                    transformed_row = {"movie_id": row[0],
+                                       "person_id": row[1],
+                                       "cast_order": row[2],
+                                       "character_name": row[3],
+                                       "department_id": row[4],
+                                       "department_name": row[5],
+                                       "gender": row[6],
+                                       "job": row[7],
+                                       "member_type": row[8],
+                                       "person_name": row[9],
+                                       "title": row[10]}
+
+                    table_transformed_data.append(transformed_row)
+
+                print("Transformed Data:")
+                for transformed_row in table_transformed_data:
+                    print(transformed_row)
+
+            elif table_name == "production_company_movies_count":
+                for row in table_data:
+                    print(row)
+                    transformed_row = {"company_id": row[0],
+                                       "company_name": row[1],
+                                       "movie_count": row[2]}
+
+                    table_transformed_data.append(transformed_row)
+
+                print("Transformed Data:")
+                for transformed_row in table_transformed_data:
+                    print(transformed_row)
+
+            elif table_name == "most_popular_genres_by_language":
+                for row in table_data:
+                    print(row)
+                    transformed_row = {"language_id": row[0],
+                                       "popularity": row[1],
+                                       "genre_id": row[2],
+                                       "genre_name": row[3],
+                                       "language_code": row[4],
+                                       "language_name": row[5]}
+
+                    table_transformed_data.append(transformed_row)
+
+                print("Transformed Data:")
+                for transformed_row in table_transformed_data:
+                    print(transformed_row)
+
+            transformed_data[table_name] = table_transformed_data
+
+        return transformed_data
