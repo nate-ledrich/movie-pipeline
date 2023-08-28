@@ -1,3 +1,5 @@
+import uuid
+
 movies_by_country_mapping = {
     "country_id": 0,
     "movie_id": 1,
@@ -32,30 +34,40 @@ movie_cast_and_crew_mapping = {
 }
 
 production_company_movies_count_mapping = {
-    "company_name": 0,
-    "movie_count": 1
+    "company_id": 0,
+    "company_name": 1,
+    "movie_count": 2
 }
 
-most_popular_genre_by_language_mapping = {
+most_popular_genres_by_language_mapping = {
     "language_id": 0,
     "genre_id": 1,
     "language_code": 2,
     "language_name": 3,
-    "genre_name": 4
+    "genre_name": 4,
+    "popularity": 5
 }
 
 mappings = {
     "movies_by_country": movies_by_country_mapping,
     "movie_cast_and_crew": movie_cast_and_crew_mapping,
     "production_company_movies_count": production_company_movies_count_mapping,
-    "most_popular_genre_by_language": most_popular_genre_by_language_mapping
+    "most_popular_genres_by_language": most_popular_genres_by_language_mapping
 }
 
 
 def transform_data(data, table_name):
     transformed_data = []
     for row in data:
-        transformed_row = {target_col: row[src_col] for target_col, src_col in mappings[table_name].items()}
+        transformed_row = {}
+        for target_col, src_col in mappings[table_name].items():
+            if target_col in ['movie_id', 'person_id', 'department_id', 'company_id', 'language_id', 'genre_id',
+                              'country_id']:
+                if row[src_col] is not None:
+                    transformed_row[target_col] = str(uuid.UUID(bytes=row[src_col].to_bytes(16, 'big')))
+                    print(f"Transformed UUID: {transformed_row[target_col]}")
+            else:
+                transformed_row[target_col] = row[src_col]
         transformed_data.append(transformed_row)
     return transformed_data
 
