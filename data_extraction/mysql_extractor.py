@@ -4,6 +4,7 @@ from config import config
 movies_by_country_query = ("SELECT country.country_id,"
                            "movie.movie_id,"
                            "movie.title, "
+                           "country.country_iso_code ,"
                            "country.country_name, "
                            "movie.budget, "
                            "movie.homepage , "
