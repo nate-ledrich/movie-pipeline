@@ -1,5 +1,5 @@
 from cassandra.cluster import Cluster
-from config.config import config
+from config.config import Config
 
 
 class CassandraDataProvider:
@@ -11,8 +11,11 @@ class CassandraDataProvider:
     ]
 
     def __init__(self):
-        self.cluster = Cluster([config.CASSANDRA_HOST], port=config.CASSANDRA_PORT)
-        self.session = self.cluster.connect(config.CASSANDRA_KEYSPACE)
+        self.cluster = Cluster([Config.CASSANDRA_HOST], port=Config.CASSANDRA_PORT)
+        self.session = self.cluster.connect()
+
+    def connect_to_keyspace(self, keyspace_name):
+        self.session.set_keyspace(keyspace_name)
 
     def fetch_data(self, table_name):
         query = f"SELECT * FROM {table_name};"
@@ -21,6 +24,7 @@ class CassandraDataProvider:
 
     def fetch_all_data(self):
         try:
+            self.connect_to_keyspace(Config.CASSANDRA_KEYSPACE)
             fetched_data = {}
             for table_name in self.table_names:
                 fetched_data[table_name] = self.fetch_data(table_name)
