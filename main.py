@@ -1,4 +1,3 @@
-from config.config import Config
 from data_extraction.mysql_extractor import MySQLExtractor
 from data_fetching.cassandra_data_fetcher import CassandraDataProvider
 from data_indexing.elasticsearch_indexer import ElasticsearchIndexer
@@ -7,20 +6,20 @@ from data_transformation.transformer import DataTransformer
 
 
 class DataProcessor:
-    def __init__(self):
-        self.mysql_extractor = MySQLExtractor()
-        self.cassandra_provider = CassandraDataProvider()
-
-    def extract_transform_load_from_mysql_to_cassandra(self):
-        data_by_table = self.mysql_extractor.extract_all_data()
+    @staticmethod
+    def extract_transform_load_from_mysql_to_cassandra():
+        mysql_extractor = MySQLExtractor()
+        data_by_table = mysql_extractor.extract_all_data()
 
         transformed_data = DataTransformer.transform_all_data(data_by_table)
 
         cassandra_loader = CassandraLoader()
         cassandra_loader.load_all_data(transformed_data)
 
-    def fetch_transform_index_from_cassandra_to_elastic(self):
-        cassandra_data = self.cassandra_provider.fetch_all_data()
+    @staticmethod
+    def fetch_transform_index_from_cassandra_to_elastic():
+        cassandra_provider = CassandraDataProvider()
+        cassandra_data = cassandra_provider.fetch_all_data()
         print("Data fetched")
 
         transformed_data = DataTransformer.transform_for_elasticsearch(cassandra_data)
