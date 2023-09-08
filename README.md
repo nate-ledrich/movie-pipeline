@@ -1,4 +1,4 @@
-# PROJET DE GESTION DE DONNÉES CINEMATOGRAPHERS
+# PROJET DE GESTION DE DONNÉES CINÉMATOGRAPHIQUES
 
 Ce projet consiste en un pipe-line de données de bout en bout qui extrait, transforme, charge, indexe des données et
 présente des visualisations des données.
